@@ -1,0 +1,11 @@
+SagePay Form library - ALPHA
+=============================================
+
+This CodeIgniter library handles payments via SagePay's
+Form e-commerce system.
+
+Extra
+-----
+
+If you'd like to request changes, report bug fixes, or contact
+the developer of this library, please email <orattue[at]toomanytabs.com>
