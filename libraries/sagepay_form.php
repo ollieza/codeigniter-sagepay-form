@@ -17,9 +17,22 @@ class sagepay_form
 {
 	var $protocol_version = "2.23";
 	var $config;
+	var $vendor_name;
+	var $your_site_fqdn;
+	var $transaction_type;
+	var $encryption_password;
+	var $purchase_url;
+	var $partner_id;
+	var $currency;
+	var $send_email;
+	var $vendor_email;
+	var $email_message;
 	var $VendorTxCode;
-	var $submit_btn = '';		// Image/Form button
-	
+	var $submit_btn = ''; // Image/Form button
+	var $allow_gift_aid = 0;
+	var $billing_agreement = 0;
+	var $apply_avscv2 = 0;
+	var $apply_3d_secure = 0;
 	var $CI;
 	
 	/**
@@ -42,20 +55,37 @@ class sagepay_form
 		log_message('debug', "Sage Pay Form Class Initialized");
 		
 		$this->button('Proceed to payment');
+		
+		$this->vendor_name = $this->CI->config->item('vendor_name');
+		$this->your_site_fqdn = $this->CI->config->item('your_site_fqdn');
+		$this->encryption_password = $this->CI->config->item('encryption_password');
+		$this->partner_id = $this->CI->config->item('partner_id');
+		$this->currency = $this->CI->config->item('currency');
+		$this->transaction_type = $this->CI->config->item('transaction_type');
+		$this->send_email = $this->CI->config->item('send_email');
+		$this->vendor_email = $this->CI->config->item('vendor_email');
+		$this->purchase_url = $this->CI->config->item('purchase_url');
 	}
 
 	// --------------------------------------------------------------------
 	
-	function generate_form($form_name = 'SagePayForm')
+	function add_data($field = NULL, $value = NULL)
 	{
-		$strCrypt = build_form_crypt();
+		$this->{$field} = $value;
+	}
+
+	// --------------------------------------------------------------------
+	
+	function form($form_name = 'SagePayForm')
+	{
+		$strCrypt = $this->_build_form_crypt();
 		
-		$str = '<form action="'.$strPurchaseURL.'" method="POST" id="SagePayForm" name="'.$form_name.'">' . "\n";
+		$str = '<form action="'.$this->purchase_url.'" method="POST" id="SagePayForm" name="'.$form_name.'">' . "\n";
 		
 		$str .= form_hidden('navigate', "") . "\n";
-		$str .= form_hidden('VPSProtocol', $strProtocol) . "\n";
-		$str .= form_hidden('TxType', $strTransactionType) . "\n";
-		$str .= form_hidden('Vendor', $strVendorName) . "\n";
+		$str .= form_hidden('VPSProtocol', $this->protocol_version) . "\n";
+		$str .= form_hidden('TxType', $this->transaction_type) . "\n";
+		$str .= form_hidden('Vendor', $this->vendor_name) . "\n";
 		$str .= form_hidden('Crypt', $strCrypt) . "\n";
 											
 		$str .= $this->submit_btn;
@@ -75,15 +105,15 @@ class sagepay_form
 	// to validate the data, which in turn calls this function to create
 	// another hidden form and submit to Sage Pay.
 	
-	function generate_auto_form()
+	function auto_form()
 	{
 		$this->button('Click here if you\'re not automatically redirected...');
 
 		echo '<html>' . "\n";
 		echo '<head><title>Processing Payment...</title></head>' . "\n";
-		echo '<body onLoad="document.forms[\'paypal_auto_form\'].submit();">' . "\n";
+		echo '<body onLoad="document.forms[\'sagepay_auto_form\'].submit();">' . "\n";
 		echo '<p>Please wait, your order is being processed and you will be redirected to our payment partner.</p>' . "\n";
-		echo $this->generate_form('sagepay_auto_form');
+		echo $this->form('sagepay_auto_form');
 		echo '</body></html>';
 	}
 
@@ -97,206 +127,192 @@ class sagepay_form
 
 	// --------------------------------------------------------------------
 	
-	function build_form_crypt()
+	function _build_form_crypt()
 	{
 		$strVendorTxCode = $this->_create_VendorTxCode();
 		
 		// ** TODO ADD in basket basket support **
 		
 		// Now to build the Form crypt field.
-		$strPost = "VendorTxCode=" . $strVendorTxCode;
+		$strPost = "VendorTxCode={$strVendorTxCode}";
 		
 		// Optional: If you are a Sage Pay Partner and wish to flag the transactions with your unique partner id, it should be passed here
-		if (strlen($strPartnerID) > 0)
+		if (strlen($this->partner_id) > 0)
 		{
-		    $strPost = $strPost . "&ReferrerID=" . $strPartnerID;			
+		    $strPost .= "&ReferrerID={$this->partner_id}";			
 		}
 
-		$strPost = $strPost . "&Amount=" . number_format($sngTotal,2); // Formatted to 2 decimal places with leading digit
-		$strPost = $strPost . "&Currency=" . $strCurrency;
+		$strPost .= "&Amount=".number_format($this->total, 2); // Formatted to 2 decimal places with leading digit
+		$strPost .= "&Currency={$this->currency}";
 		
 		// Up to 100 chars of free format description
-		$strPost = $strPost . "&Description=The best DVDs from " . $strVendorName;
+		$strPost .= "&Description=The best DVDs from"; //*********** HARD CODDED ****************
 
 		/* The SuccessURL is the page to which Form returns the customer if the transaction is successful 
 		** You can change this for each transaction, perhaps passing a session ID or state flag if you wish */
-		$strPost = $strPost . "&SuccessURL=" . $strYourSiteFQDN . "/orderSuccessful.php";
+		$strPost .= "&SuccessURL={$this->your_site_fqdn}{$this->success_url}"; //*********** HARD CODDED ****************
 
 		/* The FailureURL is the page to which Form returns the customer if the transaction is unsuccessful
 		** You can change this for each transaction, perhaps passing a session ID or state flag if you wish */
-		$strPost = $strPost . "&FailureURL=" . $strYourSiteFQDN . "/orderFailed.php";
+		$strPost .= "&FailureURL={$this->your_site_fqdn}{$this->failure_url}"; //*********** HARD CODDED ****************
 
 		// This is an Optional setting. Here we are just using the Billing names given.
-		$strPost = $strPost . "&CustomerName=" . $strBillingFirstnames . " " . $strBillingSurname;
+		$strPost .= "&CustomerName={$this->billing_first_names} {$this->billing_surname}";
 		
 		/* Email settings:
 		** Flag 'SendEMail' is an Optional setting. 
 		** 0 = Do not send either customer or vendor e-mails, 
 		** 1 = Send customer and vendor e-mails if address(es) are provided(DEFAULT). 
 		** 2 = Send Vendor Email but not Customer Email. If you do not supply this field, 1 is assumed and e-mails are sent if addresses are provided. **/
-		if ($bSendEMail == 0)
+		if ($this->send_email == 0)
 		{
-			$strPost=$strPost . "&SendEMail=0";
+			$strPost .= "&SendEMail=0";
 		}
 		else
 		{
-			if ($bSendEMail == 1) 
+			if ($this->send_email == 1) 
 			{
-		    	$strPost = $strPost . "&SendEMail=1";
+		    	$strPost .= "&SendEMail=1";
 		    } 
 			else 
 			{
-		    	$strPost = $strPost . "&SendEMail=2";
+		    	$strPost .= "&SendEMail=2";
 		    }
 
 		    if (strlen($strCustomerEMail) > 0)
 			{
-				$strPost = $strPost . "&CustomerEMail=" . $strCustomerEMail;  // This is an Optional setting
+				$strPost .= "&CustomerEMail={$strCustomerEMail}";  // This is an Optional setting
 			}
 		        
-		    if (($strVendorEMail <> "[your e-mail address]") && ($strVendorEMail <> ""))
+		    if ($this->vendor_email <> "")
 			{
-				$strPost = $strPost . "&VendorEMail=" . $strVendorEMail;  // This is an Optional setting
+				$strPost .= "&VendorEMail={$this->vendor_email}";  // This is an Optional setting
 			}
 			    
 		    // You can specify any custom message to send to your customers in their confirmation e-mail here
 		    // The field can contain HTML if you wish, and be different for each order.  This field is optional
-		    $strPost = $strPost . "&eMailMessage=Thank you so very much for your order.";
+		    if (strlen($this->email_message) > 0)
+			{
+				$strPost .= "&eMailMessage={$this->email_message}";
+			}
 		}
 
 		// Billing Details:
-		$strPost = $strPost . "&BillingFirstnames=" . $strBillingFirstnames;
-		$strPost = $strPost . "&BillingSurname=" . $strBillingSurname;
-		$strPost = $strPost . "&BillingAddress1=" . $strBillingAddress1;
+		$strPost .= "&BillingFirstnames={$this->billing_first_names}";
+		$strPost .= "&BillingSurname={$this->billing_surname}";
+		$strPost .= "&BillingAddress1={$this->billing_address1}";
 		
-		if (strlen($strBillingAddress2) > 0)
+		if (strlen($this->billing_address2) > 0)
 		{
-			$strPost=$strPost . "&BillingAddress2=" . $strBillingAddress2;	
+			$strPost .= "&BillingAddress2={$this->billing_address2}";	
 		}
 		
-		$strPost = $strPost . "&BillingCity=" . $strBillingCity;
-		$strPost = $strPost . "&BillingPostCode=" . $strBillingPostCode;
-		$strPost = $strPost . "&BillingCountry=" . $strBillingCountry;
+		$strPost .= "&BillingCity={$this->billing_city}";
+		$strPost .= "&BillingPostCode={$this->billing_postcode}";
+		$strPost .= "&BillingCountry={$this->billing_country}";
 		
-		if (strlen($strBillingState) > 0)
+		if (strlen($this->billing_state) > 0)
 		{
-			$strPost=$strPost . "&BillingState=" . $strBillingState;
+			$strPost .= "&BillingState={$this->billing_state}";
 		}
 		
-		if (strlen($strBillingPhone) > 0)
+		if (strlen($this->billing_phone) > 0)
 		{
-			$strPost=$strPost . "&BillingPhone=" . $strBillingPhone;
+			$strPost .= "&BillingPhone={$this->billing_phone}";
 		}
 
 		// Delivery Details:
-		$strPost=$strPost . "&DeliveryFirstnames=" . $strDeliveryFirstnames;
-		$strPost=$strPost . "&DeliverySurname=" . $strDeliverySurname;
-		$strPost=$strPost . "&DeliveryAddress1=" . $strDeliveryAddress1;
+		$strPost .= "&DeliveryFirstnames={$this->delivery_first_names}";
+		$strPost .= "&DeliverySurname={$this->delivery_surname}";
+		$strPost .= "&DeliveryAddress1={$this->delivery_address1}";
 		
-		if (strlen($strDeliveryAddress2) > 0)
+		if (strlen($this->delivery_address2) > 0)
 		{
-			$strPost = $strPost . "&DeliveryAddress2=" . $strDeliveryAddress2;
+			$strPost .= "&DeliveryAddress2={$this->delivery_address2}";
 		}
-		$strPost = $strPost . "&DeliveryCity=" . $strDeliveryCity;
-		$strPost = $strPost . "&DeliveryPostCode=" . $strDeliveryPostCode;
-		$strPost = $strPost . "&DeliveryCountry=" . $strDeliveryCountry;
+		$strPost .= "&DeliveryCity={$this->delivery_city}";
+		$strPost .= "&DeliveryPostCode={$this->delivery_postcode}";
+		$strPost .= "&DeliveryCountry={$this->delivery_country}";
 		
-		if (strlen($strDeliveryState) > 0)
+		if (strlen($this->delivery_state) > 0)
 		{
-			$strPost=$strPost . "&DeliveryState=" . $strDeliveryState;	
+			$strPost .= "&DeliveryState={$this->delivery_state}";	
 		}
 		
-		if (strlen($strDeliveryPhone) > 0)
+		if (strlen($this->delivery_phone) > 0)
 		{
-			$strPost=$strPost . "&DeliveryPhone=" . $strDeliveryPhone;
+			$strPost .= "&DeliveryPhone={$this->delivery_phone}";
 		}
 		
 		// For charities registered for Gift Aid, set to 1 to display the Gift Aid check box on the payment pages
-		$strPost = $strPost . "&AllowGiftAid=0";
+		if ($this->allow_gift_aid == 1)
+		{
+			$strPost .= "&AllowGiftAid=1"; //*********** HARD CODDED ****************
+		}
+		else
+		{
+			$strPost .= "&AllowGiftAid=0";
+		}
 		
 		/* Allow fine control over AVS/CV2 checks and rules by changing this value. 0 is Default 
-		** It can be changed dynamically, per transaction, if you wish.  See the Server Protocol document */
-		if ($strTransactionType!=="AUTHENTICATE")
+		** It can be changed dynamically, per transaction, if you wish. See the Form Protocol document */
+		if ($this->transaction_type !== "AUTHENTICATE")
 		{
-			$strPost = $strPost . "&ApplyAVSCV2=0";
+			$strPost .= "&ApplyAVSCV2=0";
+		}
+		
+		switch($this->apply_avscv2)
+		{
+			case "1":
+			case "2":
+			case "3":
+				$strPost .= "&ApplyAVSCV2={$this->apply_avscv2}";
+			break;
+
+			default:
+				$strPost .= "&ApplyAVSCV2=0";
+			break;
 		}
 		
 		/* Allow fine control over 3D-Secure checks and rules by changing this value. 0 is Default 
 		** It can be changed dynamically, per transaction, if you wish.  See the Form Protocol document */
-		$strPost = $strPost . "&Apply3DSecure=0";
+		
+		switch($this->apply_3d_secure)
+		{
+			case "1":
+			case "2":
+			case "3":
+				$strPost .= "&Apply3DSecure={$this->apply_3d_secure}"; //*********** HARD CODDED ****************
+			break;
+
+			default:
+				$strPost .= "&Apply3DSecure=0"; //*********** HARD CODDED ****************
+			break;
+		}
+		
+		/* This field must be set for PAYPAL REFERENCE transactions 
+		All non-PayPal transactions can be repeated without this 
+		flag.
+		
+		If you wish to register this transaction as the first in a series of 
+		regular payments, this field should be set to 1.  
+		
+		If you do not have a PayPal account set up for use via Sage Pay, then this field 
+		is not necessary and should be omitted or set to 0. */
+		if ($this->billing_agreement == 1)
+		{
+			$strPost .= "&BillingAgreement=1";
+		}
+		else
+		{
+			$strPost .= "&BillingAgreement=0";
+		}
 		
 		// Encrypt the plaintext string for inclusion in the hidden field
-		$strCrypt = $this->_base64Encode(SimpleXor($strPost,$strEncryptionPassword));
+		$strCrypt = $this->_base64Encode($this->_SimpleXor($strPost, $this->encryption_password));
 		
 		return $strCrypt;
 	}
-
-	// --------------------------------------------------------------------
-
-	/* Specification - parameters
-	
-	VendorTxCode - site creates this unique code
-	Amount - with 2 decimal places where relevant
-	Currency - 3 characters 
-	Description - Max 100 characters
-	SuccessURL - Max 2000 characters
-	FailureURL - Max 2000 characters
-	
-	Optional
-	 
-	CustomerName - Max 100 characters
-	CustomerECustomerEMail - Max 255 characters 
-	
-	VendorEMail - Max 255 characters 
-				-> If provided, an e-mail will be sent to this address when each 
-				transaction completes (successfully or otherwise).
-
-	SendEMail - 
-	0 = Do not send either customer or vendor e- 
-	mails 
-	1 = Send customer and vendor e-mails if 
-	addresses are provided (DEFAULT) 
-	2 = Send vendor e-mail but NOT the customer e-mail 
-	
-	If you do not supply this field, 1 is assumed and e-mails are sent 
-	if addresses are provided. 
-
-	// A message to the customer which is inserted into the successful transaction e-mails only.
-	// If provided this message is included toward the top of the
-	eMailMessage - Max 7500 characters (HTML)
-	
-	
-	BillingSurname - Max 20 characters
-	BillingFirstnames - Max 20 characters
-	BillingAddress1 - Max 100 characters
-	BillingAddress2 (optional) Max 100 characters
-	BillingCity - Max 40 characters
-	BillingPostCode  Max 10 characters
-	BillingCountry - 2 characters ISO 3166-1 country code
-	BillingState (optional) - Max 2 characters State code for US customers only
-	BillingPhone (optional) - Max 20 characters
-	DeliverySurname - Max 20 characters 
-	DeliveryFirstnames - Max 20 characters
-	DeliveryAddress1 - Max 100 characters
-	DeliveryAddress2 (optional) - Max 100 characters
-	DeliveryCity - Max 40 characters
-	DeliveryPostCode - Max 10 characters
-	DeliveryCountry - 2 characters ISO 3166-1 country code
-	DeliveryState (optional) - Max 2 characters State code for US customers only
-	DeliveryPhone (optional) - Max 20 characters
-	
-	// You can use this field to supply details of the customer’s order.  
-	// This information will be displayed to you in My Sage Pay. 
-	Basket (optional) - Max 7500 characters 
-	
-	// 0 = No Gift Aid Box displayed (default) 
-	// 1 = Display Gift Aid Box on payment screen. This flag allows the gift aid acceptance box to appear for this 
-	AllowGiftAid (optional)
-	ApplyAVSCV2 
-	Apply3DSecure
-	BillingAgreement
-
-	*/
 	
 	// --------------------------------------------------------------------
 	
@@ -377,7 +393,7 @@ class sagepay_form
 	/* Base 64 decoding function **
 	** PHP does it natively but just for consistency and ease of maintenance, let's declare our own function **/
 
-	function _base64Decode($scrambled) {
+	function base64Decode($scrambled) {
 	  // Initialise output variable
 	  $output = "";
 

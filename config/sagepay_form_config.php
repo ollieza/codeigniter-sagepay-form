@@ -16,26 +16,25 @@ $config['connect_to'] = "SIMULATOR";
 /** IMPORTANT.  Set the strYourSiteFQDN value to the Fully Qualified Domain Name of your server. **
 ** This should start http:// or https:// and should be the name by which our servers can call back to yours **
 ** i.e. it MUST be resolvable externally, and have access granted to the Sage Pay servers **
-** examples would be https://www.mysite.com or http://212.111.32.22/ **
-** NOTE: You should leave the final / in place. **/
-$config['your_site_fqdn'] = "http://example.com";  
+** examples would be https://www.mysite.com or http://212.111.32.22/ **/
+$config['your_site_fqdn'] = "http://example.com/"; // IMPORTANT include final /
 
 // Set this value to the Vendor Name assigned to you by Sage Pay or chosen when you applied
-$config['vendorname'] = "yourvendorname";
+$config['vendor_name'] = "yourvendorname";
 
 /** Set this value to the XOR Encryption password assigned to you by Sage Pay **/
-$config['encryption_password'] = "";
+$config['encryption_password'] = "TPxgfK38BZGxS8Ho";
 
 // Set this to indicate the currency in which you wish to trade. 3 characters Examples: GBP, EUR and USD
 // The currency must be supported by one of your Sage Pay merchant accounts or the transaction will be rejected. 
 $config['currency'] = "GBP";
 
 /** This can be DEFERRED or AUTHENTICATE if your Sage Pay account supports those payment types **/
-$config['transactiontype'] = "PAYMENT";
+$config['transaction_type'] = "PAYMENT";
 
 /** Optional setting. If you are a Sage Pay Partner and wish to flag the transactions with your unique partner id set it here. **/
 // Currently not supported by Library
-// $config['partner_id'] = "";
+$config['partner_id'] = "";
 
 /* Optional setting. 
 ** 0 = Do not send either customer or vendor e-mails, 
@@ -65,4 +64,5 @@ else // simulator
 	$config['purchase_url'] = "https://test.sagepay.com/simulator/VSPFormGateway.asp";
 }
 
-?>
+/* End of file sagepay_form_config.php */
+/* Location: ./application/config/sagepay_form_config.php */
