@@ -1,8 +1,13 @@
-SagePay Form library - ALPHA
-=============================================
+SagePay Form library - ALPHA - *** non functional code ***
+==========================================================
 
 This CodeIgniter library handles payments via SagePay's
 Form e-commerce system.
+
+TODO
+-----
+
+Integrate product basket
 
 Extra
 -----
