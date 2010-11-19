@@ -55,13 +55,13 @@ class Sagepay_form_example extends Controller
 		// Can be the same as billing  
 		$this->sagepay_form->set_field('delivery_first_names', "Jo"); // Max 20 characters
 		$this->sagepay_form->set_field('delivery_surname', "Blogs"); // Max 20 characters
-		$this->sagepay_form->set_field('delivery_address1', "Jo's place"); // Max 100 characters
+		$this->sagepay_form->set_field('delivery_address1', "Jo's office"); // Max 100 characters
 		$this->sagepay_form->set_field('delivery_address2', ""); // Optional Max 100 characters
 		$this->sagepay_form->set_field('delivery_city', "London"); // Max 40 characters
-		$this->sagepay_form->set_field('delivery_postcode', "EC8 8RH"); // Max 10 characters
+		$this->sagepay_form->set_field('delivery_postcode', "EC2 8RH"); // Max 10 characters
 		$this->sagepay_form->set_field('delivery_country', "UK"); // 2 characters ISO 3166-1 country code
 		$this->sagepay_form->set_field('delivery_state', ""); // US customers only Max 2 characters State code
-		$this->sagepay_form->set_field('delivery_phone', "01205581818"); // Optional Max 20 characters
+		$this->sagepay_form->set_field('delivery_phone', "07879864846"); // Optional Max 20 characters
 		
 		// Or we can set the same delivery address as follows 
 		$this->sagepay_form->set_same_delivery_address();
@@ -80,6 +80,7 @@ class Sagepay_form_example extends Controller
 		$this->sagepay_form->set_field('apply_3d_secure', 0); // Allow fine control over 3D-Secure checks and rules by changing this value
 		$this->sagepay_form->set_field('billing_agreement', 0); // For PAYPAL REFERENCE transactions 
 		
+		echo '<h2>Sage Pay Form example payment';
 		echo $this->sagepay_form->form();
 	}
 
