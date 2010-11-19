@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `sagepay_payments`;
-CREATE TABLE IF NOT EXISTS `sagepay_payments` (
+DROP TABLE IF EXISTS `sagepay_form_payments`;
+CREATE TABLE IF NOT EXISTS `sagepay_form_payments` (
   `VendorTxCode` varchar(50) NOT NULL,
   `VPSTxId` varchar(38) default NULL,
   `Status` varchar(20) default NULL,
