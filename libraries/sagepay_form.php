@@ -90,13 +90,28 @@ class sagepay_form
 
 	// --------------------------------------------------------------------
 	
-	function add_data($field = NULL, $value = NULL)
+	function set_field($field = NULL, $value = NULL)
 	{
 		$this->{$field} = $value;
 	}
 
 	// --------------------------------------------------------------------
 	
+	function set_same_delivery_address()
+	{
+		$this->delivery_first_names = $this->billing_first_names;
+		$this->delivery_surname = $this->billing_surname;
+		$this->delivery_address1 = $this->billing_address1;
+		$this->delivery_address2 = $this->billing_address2;
+		$this->delivery_city = $this->billing_city;
+		$this->delivery_postcode = $this->billing_postcode;
+		$this->delivery_country = $this->billing_country;
+		$this->delivery_state = $this->billing_state;
+		$this->delivery_phone = $this->billing_phone;
+	}
+
+	// --------------------------------------------------------------------
+		
 	// Creates a unique string
 	// Called by controller and the value would be stored in db against the purchase
 	function create_vendor_tx_code()
