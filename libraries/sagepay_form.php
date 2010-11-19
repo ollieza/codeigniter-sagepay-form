@@ -24,7 +24,7 @@ class sagepay_form
 	var $purchase_url;
 	var $partner_id;
 	var $currency;
-	var $VendorTxCode;
+	var $vendor_tx_code;
 	var $total;
 	var $description;
 	var $billing_first_names;
@@ -97,6 +97,19 @@ class sagepay_form
 
 	// --------------------------------------------------------------------
 	
+	// Creates a unique string
+	// Called by controller and the value would be stored in db against the purchase
+	function create_vendor_tx_code()
+	{
+		$timestamp = date("y-m-d-H-i-s", time());
+		$random_number = rand(0,32000)*rand(0,32000);
+		$this->vendor_tx_code = "{$timestamp}-{$random_number}";
+		
+		return $this->vendor_tx_code;
+	}
+
+	// --------------------------------------------------------------------
+	
 	function form($form_name = 'SagePayForm')
 	{
 		$strCrypt = $this->_build_form_crypt();
@@ -150,12 +163,18 @@ class sagepay_form
 	
 	function _build_form_crypt()
 	{
-		$strVendorTxCode = $this->_create_VendorTxCode();
-		
 		// ** TODO ADD in basket basket support **
 		
 		// Now to build the Form crypt field.
-		$strPost = "VendorTxCode={$strVendorTxCode}";
+		if (strlen($this->vendor_tx_code) > 0)
+		{
+			// This is a fallback in the instance that the controller
+			// did not call this function which it should to store the
+			// value in the db for records.
+			$this->create_vendor_tx_code();
+		}
+		
+		$strPost = "VendorTxCode={$this->vendor_tx_code}";
 		
 		// Optional: If you are a Sage Pay Partner and wish to flag the transactions with your unique partner id, it should be passed here
 		if (strlen($this->partner_id) > 0)
@@ -330,21 +349,73 @@ class sagepay_form
 		}
 		
 		// Encrypt the plaintext string for inclusion in the hidden field
-		$strCrypt = $this->_base64Encode($this->_SimpleXor($strPost, $this->encryption_password));
+		$strCrypt = $this->_encode_crypt($strPost);
 		
 		return $strCrypt;
 	}
 	
 	// --------------------------------------------------------------------
 	
-	// Creates a unique string
-	function _create_VendorTxCode()
-	{
-		$timestamp = date("y-m-d-H-i-s", time());
-		$random_number = rand(0,32000)*rand(0,32000);
-		$VendorTxCode = "{$timestamp}-{$random_number}";
+	/* The getToken function.                                                                                       **
+	** NOTE: A function of convenience that extracts the value from the "name=value&name2=value2..." reply string 	**
+	** Works even if one of the values is a URL containing the & or = signs.                                      	*/
 
-		return $VendorTxCode;
+	function getToken($thisString) {
+
+	  // List the possible tokens
+	  $Tokens = array(
+	    "Status",
+	    "StatusDetail",
+	    "VendorTxCode",
+	    "VPSTxId",
+	    "TxAuthNo",
+	    "Amount",
+	    "AVSCV2", 
+	    "AddressResult", 
+	    "PostCodeResult", 
+	    "CV2Result", 
+	    "GiftAid", 
+	    "3DSecureStatus", 
+	    "CAVV",
+		"AddressStatus",
+		"CardType",
+		"Last4Digits",
+		"PayerStatus","CardType");
+
+	  // Initialise arrays
+	  $output = array();
+	  $resultArray = array();
+
+	  // Get the next token in the sequence
+	  for ($i = count($Tokens)-1; $i >= 0 ; $i--){
+	    // Find the position in the string
+	    $start = strpos($thisString, $Tokens[$i]);
+		// If it's present
+	    if ($start !== false){
+	      // Record position and token name
+	      $resultArray[$i]->start = $start;
+	      $resultArray[$i]->token = $Tokens[$i];
+	    }
+	  }
+
+	  // Sort in order of position
+	  sort($resultArray);
+		// Go through the result array, getting the token values
+	  for ($i = 0; $i<count($resultArray); $i++){
+	    // Get the start point of the value
+	    $valueStart = $resultArray[$i]->start + strlen($resultArray[$i]->token) + 1;
+		// Get the length of the value
+	    if ($i==(count($resultArray)-1)) {
+	      $output[$resultArray[$i]->token] = substr($thisString, $valueStart);
+	    } else {
+	      $valueLength = $resultArray[$i+1]->start - $resultArray[$i]->start - strlen($resultArray[$i]->token) - 2;
+		  $output[$resultArray[$i]->token] = substr($thisString, $valueStart, $valueLength);
+	    }      
+
+	  }
+
+	  // Return the ouput array
+	  return $output;
 	}
 
 	// --------------------------------------------------------------------
@@ -392,7 +463,23 @@ class sagepay_form
 		return $cleanInput;
 
 	}
-
+	
+	// --------------------------------------------------------------------
+	
+	// Wrapper function to encrypt data to store in hidden field which is sent to Sage Pay
+	function _encode_crypt($post = NULL)
+	{
+		return $this->_base64Encode($this->_SimpleXor($post, $this->encryption_password));
+	}
+	
+	// --------------------------------------------------------------------
+	
+	// Wrapper function to decrypt the response data sent back from Sage Pay to success/failure url via url string
+	function decode_crypt($crypt = NULL)
+	{
+		return $this->_simpleXor($this->_base64Decode($crypt), $this->encryption_password);
+	}
+	
 	// --------------------------------------------------------------------
 	
 	/* Base 64 Encoding function **
@@ -414,7 +501,7 @@ class sagepay_form
 	/* Base 64 decoding function **
 	** PHP does it natively but just for consistency and ease of maintenance, let's declare our own function **/
 
-	function base64Decode($scrambled) {
+	function _base64Decode($scrambled) {
 	  // Initialise output variable
 	  $output = "";
 

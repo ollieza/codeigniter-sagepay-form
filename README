@@ -4,11 +4,24 @@ SagePay Form library - Functional
 This CodeIgniter library handles payments via SagePay's
 Form e-commerce system.
 
+Setup instructions
+------------------
+
+$_GET variables need to be enabled because Sage Pay returns a url like
+payment_status/failure/?crypt=ByQZExM . To enable make these changes to
+applicaton/config/config.php
+
+$config['uri_protocol'] = "PATH_INFO";
+$config['permitted_uri_chars'] = 'a-z 0-9~%.:_\-?'; // Added ?
+$config['enable_query_strings'] = TRUE;
+
 Usage
 -----
 
-An example controller is provided which displays all available values
-that can be passed to Sage Pay.
+All available values that can be passed to Sage Pay are listed in
+controllers/sagepay_form_example.php
+
+The controller and views provide a fully working example.
 
 TODO
 -----

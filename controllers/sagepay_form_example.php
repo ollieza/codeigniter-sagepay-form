@@ -1,12 +1,20 @@
 <?php
 
-/*
-| -------------------------------------------------------------------------
-| Sagepay library example
-| -------------------------------------------------------------------------
-*/
+/**
+ * Sage Pay Form example controller
+ *
+ * Functional code to pass order to Sage Pay Go Form service
+ * http://www.sagepay.com/products_services/sage_pay_go/integration/form
+ * and handle the success/failure redirects 
+ *
+ * @package   sagepay_form
+ * @author    Ollie Rattue, Too many tabs <orattue[at]toomanytabs.com>
+ * @copyright Copyright (c) 2010, Ollie Rattue
+ * @license   http://www.opensource.org/licenses/mit-license.php
+ * @link      https://github.com/ollierattue/codeigniter-sagepay-form
+ */
 
-class Sagepay_example extends Controller
+class Sagepay_form_example extends Controller
 {
 	public function __construct()
     {
@@ -19,12 +27,19 @@ class Sagepay_example extends Controller
 	
     function payment()
 	{
+		$vendor_tx_code = $this->sagepay_form->create_vendor_tx_code();
+		
+		/**************************************************************************************************
+		* You need to save $vendor_tx_code against your order so that you can
+		* match the success/failure response message from Sage Pay
+		**************************************************************************************************/
+		
 		$this->sagepay_form->add_data('total', '15.00'); // with 2 decimal places where relevant
 		$this->sagepay_form->add_data('description', 'My instructional DVD'); // The description of goods purchased is displayed on the Sage Pay Max 100
 				
 		// The domain name and protocol (http or https) is defined in sagepay_form_config. DO NOT INCLUDE HERE.
-		$this->sagepay_form->add_data('success_url', 'sagepay_example/payment_status/success');
-		$this->sagepay_form->add_data('failure_url', 'sagepay_example/payment_status/failure');
+		$this->sagepay_form->add_data('success_url', 'sagepay_example/payment_status/success/');
+		$this->sagepay_form->add_data('failure_url', 'sagepay_example/payment_status/failure/');
 		
 		// Billing address
 		$this->sagepay_form->add_data('billing_first_names', "Jo"); // Max 20 characters
@@ -65,26 +80,61 @@ class Sagepay_example extends Controller
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	// Redirected to from SagePay Form
-	function payment_status($type = NULL, $crypt = NULL)
+	function payment_status($type = NULL)
 	{
+		$crypt = $_GET["crypt"];
+
+		$decoded_response = $this->sagepay_form->decode_crypt('ByQZExM4DncJfBQMMkw9HBA1DAYPJw5rNzkkHSBLLho4PAFHJz5HUC0oLgs2XGg7JjEWFAcoR1EtNGEuNlYsACYEACQJL1YFc2pqSWIVeVZ5YUxKVH4eCnZ3cktmDX5fZmJJQTAbYGw6EyNFKABwXxUUTFVfZnUOe2hqTGp7eUIVFjokS38EDXNudD5hDgsqES1eMx4KRkwqFChFZAt8VnIRFQgTJUcFc29hOQVrCzlmbTkrKmt+eRYZD14SXCwdMSMLNQM4RlQ2Zwo5B3sAKhB2KAgVP3BXJj8VHSBNJBtpHTkzJQN2fGQZEUoBXTsaOCRFKicfcHAHHmE/Ol48Lj00RVdAeHdrJzkyCjZrPA4gJQtaKQAVewMMEUUedh0nZAE3KTUecGJ7EHcvHwB/PxYHXiQHOVdsOyoiRQVxGy5yHBkUEn93USUzMwtuAXpabQ==');
+
+		$response_array = $this->sagepay_form->getToken($decoded_response);
+		$this->data['response_array'] = $response_array;		
+
 		switch ($type)
 		{
 			case 'success':
-				echo 'Payment successfully made';
+				$this->load->view('sagepay_form_example/payment_status/success', $this->data);
 			break;
-			
+
 			case('failure'):
-				echo 'Payment failed';
+				// Determine the reason this transaction was unsuccessful
+				if ($response_array['Status'] == "NOTAUTHED")
+				{
+					$failure_reason = "You payment was declined by the bank.  This could be due to insufficient funds, or incorrect card details.";
+				}
+				else if ($response_array['Status'] == "ABORT")
+				{
+					$failure_reason =  "You chose to Cancel your order on the payment pages.  If you wish to change your order and resubmit it you can do so here. If you have questions or concerns about ordering online, please contact us at [your number].";
+				}
+				else if ($response_array['Status'] == "REJECTED")
+				{
+					$failure_reason = "Your order did not meet our minimum fraud screening requirements. If you have questions about our fraud screening rules, or wish to contact us to discuss this, please call [your number].";
+				}
+				else if ($response_array['Status'] == "INVALID" or $response_array['Status'] == "MALFORMED")
+				{
+					$failure_reason = "We could not process your order because we have been unable to register your transaction with our Payment Gateway. You can place the order over the telephone instead by calling [your number].";
+				}
+				else if ($response_array['Status'] == "ERROR")
+				{
+					$failure_reason = "We could not process your order because our Payment Gateway service was experiencing difficulties. You can place the order over the telephone instead by calling [your number].";
+				}
+				else
+				{
+					$failure_reason =  "The transaction process failed. Please contact us with the date and time of your order and we will investigate.";
+				}
+
+				$this->data['failure_reason'] = $failure_reason;
+
+				$this->load->view('sagepay_form_example/payment_status/failure', $this->data);	
 			break;
-			
+
 			default:
 				redirect();
 			break;
 		}
 	}
-	
+
 	// --------------------------------------------------------------------
 }
 ?>
