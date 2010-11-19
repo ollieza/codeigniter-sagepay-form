@@ -179,9 +179,9 @@ class sagepay_form
 		    	$strPost .= "&SendEMail=2";
 		    }
 
-		    if (strlen($strCustomerEMail) > 0)
+		    if (strlen($this->customer_email) > 0)
 			{
-				$strPost .= "&CustomerEMail={$strCustomerEMail}";  // This is an Optional setting
+				$strPost .= "&CustomerEMail={$this->customer_email}";  // This is an Optional setting
 			}
 		        
 		    if ($this->vendor_email <> "")
