@@ -25,7 +25,7 @@ class Sagepay_form_example extends Controller
 
 	// --------------------------------------------------------------------
 	
-    function payment()
+    function index()
 	{
 		$vendor_tx_code = $this->sagepay_form->create_vendor_tx_code();
 		
@@ -38,8 +38,8 @@ class Sagepay_form_example extends Controller
 		$this->sagepay_form->set_field('description', 'My instructional DVD'); // The description of goods purchased is displayed on the Sage Pay Max 100
 				
 		// The domain name and protocol (http or https) is defined in sagepay_form_config. DO NOT INCLUDE HERE.
-		$this->sagepay_form->set_field('success_url', 'sagepay_example/payment_status/success/');
-		$this->sagepay_form->set_field('failure_url', 'sagepay_example/payment_status/failure/');
+		$this->sagepay_form->set_field('success_url', 'sagepay_form_example/payment_status/success/');
+		$this->sagepay_form->set_field('failure_url', 'sagepay_form_example/payment_status/failure/');
 		
 		// Billing address
 		$this->sagepay_form->set_field('billing_first_names', "Jo"); // Max 20 characters
