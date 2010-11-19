@@ -4,6 +4,12 @@ SagePay Form library - Functional
 This CodeIgniter library handles payments via SagePay's
 Form e-commerce system.
 
+Usage
+-----
+
+An example controller is provided which displays all available values
+that can be passed to Sage Pay.
+
 TODO
 -----
 

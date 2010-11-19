@@ -20,9 +20,9 @@ class Sagepay_example extends Controller
     function payment()
 	{
 		$this->sagepay_form->add_data('total', '15.00'); // with 2 decimal places where relevant
-		
-		// The domain name and protocol (http or https) is defined in sagepay_form_config
-		// Do not include here.
+		$this->sagepay_form->add_data('description', 'My instructional DVD'); // The description of goods purchased is displayed on the Sage Pay Max 100
+				
+		// The domain name and protocol (http or https) is defined in sagepay_form_config. DO NOT INCLUDE HERE.
 		$this->sagepay_form->add_data('success_url', 'sagepay_example/payment_status/success');
 		$this->sagepay_form->add_data('failure_url', 'sagepay_example/payment_status/failure');
 		

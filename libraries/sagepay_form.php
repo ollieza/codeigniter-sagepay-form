@@ -24,15 +24,36 @@ class sagepay_form
 	var $purchase_url;
 	var $partner_id;
 	var $currency;
+	var $VendorTxCode;
+	var $total;
+	var $description;
+	var $billing_first_names;
+	var $billing_surname;
+	var $billing_address1;
+	var $billing_address2;
+	var $billing_city;
+	var $billing_postcode;
+	var $billing_country;
+	var $billing_state;
+	var $billing_phone;
+	var $delivery_first_names;
+	var $delivery_surname;
+	var $delivery_address1;
+	var $delivery_address2;
+	var $delivery_city;
+	var $delivery_postcode;
+	var $delivery_country;
+	var $delivery_state;
+	var $delivery_phone;
 	var $send_email;
 	var $vendor_email;
+	var $customer_email;
 	var $email_message;
-	var $VendorTxCode;
-	var $submit_btn = ''; // Image/Form button
 	var $allow_gift_aid = 0;
 	var $billing_agreement = 0;
 	var $apply_avscv2 = 0;
 	var $apply_3d_secure = 0;
+	var $submit_btn; // Image/Form button
 	var $CI;
 	
 	/**
@@ -146,7 +167,7 @@ class sagepay_form
 		$strPost .= "&Currency={$this->currency}";
 		
 		// Up to 100 chars of free format description
-		$strPost .= "&Description=The best DVDs from"; //*********** HARD CODDED ****************
+		$strPost .= "&Description={$this->description}"; //*********** HARD CODDED ****************
 
 		/* The SuccessURL is the page to which Form returns the customer if the transaction is successful 
 		** You can change this for each transaction, perhaps passing a session ID or state flag if you wish */
