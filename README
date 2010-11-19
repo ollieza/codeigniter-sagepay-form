@@ -23,6 +23,11 @@ controllers/sagepay_form_example.php
 
 The controller and views provide a fully working example.
 
+Schema
+------
+
+Useful schema to store Sage Pay response into
+
 TODO
 -----
 
