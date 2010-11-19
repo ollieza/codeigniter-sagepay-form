@@ -86,9 +86,9 @@ class Sagepay_form_example extends Controller
 	{
 		$crypt = $_GET["crypt"];
 
-		$decoded_response = $this->sagepay_form->decode_crypt('ByQZExM4DncJfBQMMkw9HBA1DAYPJw5rNzkkHSBLLho4PAFHJz5HUC0oLgs2XGg7JjEWFAcoR1EtNGEuNlYsACYEACQJL1YFc2pqSWIVeVZ5YUxKVH4eCnZ3cktmDX5fZmJJQTAbYGw6EyNFKABwXxUUTFVfZnUOe2hqTGp7eUIVFjokS38EDXNudD5hDgsqES1eMx4KRkwqFChFZAt8VnIRFQgTJUcFc29hOQVrCzlmbTkrKmt+eRYZD14SXCwdMSMLNQM4RlQ2Zwo5B3sAKhB2KAgVP3BXJj8VHSBNJBtpHTkzJQN2fGQZEUoBXTsaOCRFKicfcHAHHmE/Ol48Lj00RVdAeHdrJzkyCjZrPA4gJQtaKQAVewMMEUUedh0nZAE3KTUecGJ7EHcvHwB/PxYHXiQHOVdsOyoiRQVxGy5yHBkUEn93USUzMwtuAXpabQ==');
-
+		$decoded_response = $this->sagepay_form->decode_crypt($crypt);
 		$response_array = $this->sagepay_form->getToken($decoded_response);
+		
 		$this->data['response_array'] = $response_array;		
 
 		switch ($type)
