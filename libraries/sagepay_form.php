@@ -313,20 +313,18 @@ class sagepay_form
 		** It can be changed dynamically, per transaction, if you wish. See the Form Protocol document */
 		if ($this->transaction_type !== "AUTHENTICATE")
 		{
-			$strPost .= "&ApplyAVSCV2=0";
-		}
-		
-		switch($this->apply_avscv2)
-		{
-			case "1":
-			case "2":
-			case "3":
-				$strPost .= "&ApplyAVSCV2={$this->apply_avscv2}";
-			break;
+			switch($this->apply_avscv2)
+			{
+				case "1":
+				case "2":
+				case "3":
+					$strPost .= "&ApplyAVSCV2={$this->apply_avscv2}";
+				break;
 
-			default:
-				$strPost .= "&ApplyAVSCV2=0";
-			break;
+				default:
+					$strPost .= "&ApplyAVSCV2=0";
+				break;
+			}
 		}
 		
 		/* Allow fine control over 3D-Secure checks and rules by changing this value. 0 is Default 
