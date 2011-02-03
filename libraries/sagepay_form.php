@@ -181,7 +181,7 @@ class sagepay_form
 		// ** TODO ADD in basket basket support **
 		
 		// Now to build the Form crypt field.
-		if (strlen($this->vendor_tx_code) > 0)
+		if ($this->vendor_tx_code == '')
 		{
 			// This is a fallback in the instance that the controller
 			// did not call this function which it should to store the
