@@ -60,10 +60,14 @@
 				   <td class="fieldLabel">3D-Secure Status:</td>
 				   <td class="fieldData"><?php echo $response_array['3DSecureStatus']; ?></td>
 				</tr>
+				
+				<?php if (array_key_exists('CAVV',$response_array)): ?>
 				<tr>
 				   <td class="fieldLabel">CAVV:</td>
 				   <td class="fieldData"><?php echo $response_array['CAVV']; ?></td>
 				</tr>
+				<?php endif; ?>
+				
 				<tr>
 				   <td class="fieldLabel">CardType:</td>
 				   <td class="fieldData"><?php echo $response_array['CardType']; ?></td>
