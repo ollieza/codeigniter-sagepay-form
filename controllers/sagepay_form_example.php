@@ -48,7 +48,7 @@ class Sagepay_form_example extends Controller
 		$this->sagepay_form->set_field('billing_address2', ""); // Optional Max 100 characters
 		$this->sagepay_form->set_field('billing_city', "London"); // Max 40 characters
 		$this->sagepay_form->set_field('billing_postcode', "EC8 8RH"); // Max 10 characters
-		$this->sagepay_form->set_field('billing_country', "UK"); // 2 characters ISO 3166-1 country code
+		$this->sagepay_form->set_field('billing_country', "GB"); // 2 characters ISO 3166-1 country code
 		$this->sagepay_form->set_field('billing_state', ""); // US customers only Max 2 characters State code
 		$this->sagepay_form->set_field('billing_phone', "01205581818"); // Optional Max 20 characters
 		                               
@@ -59,7 +59,7 @@ class Sagepay_form_example extends Controller
 		$this->sagepay_form->set_field('delivery_address2', ""); // Optional Max 100 characters
 		$this->sagepay_form->set_field('delivery_city', "London"); // Max 40 characters
 		$this->sagepay_form->set_field('delivery_postcode', "EC2 8RH"); // Max 10 characters
-		$this->sagepay_form->set_field('delivery_country', "UK"); // 2 characters ISO 3166-1 country code
+		$this->sagepay_form->set_field('delivery_country', "GB"); // 2 characters ISO 3166-1 country code
 		$this->sagepay_form->set_field('delivery_state', ""); // US customers only Max 2 characters State code
 		$this->sagepay_form->set_field('delivery_phone', "07879864846"); // Optional Max 20 characters
 		
