@@ -14,7 +14,7 @@
  * @link      https://github.com/ollierattue/codeigniter-sagepay-form
  */
 
-class Sagepay_form_example extends Controller
+class Sagepay_form_example extends CI_Controller
 {
 	public function __construct()
     {
