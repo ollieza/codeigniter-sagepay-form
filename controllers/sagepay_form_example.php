@@ -8,10 +8,7 @@
  * and handle the success/failure redirects 
  *
  * @package   sagepay_form
- * @author    Ollie Rattue, Too many tabs <orattue[at]toomanytabs.com>
- * @copyright Copyright (c) 2010, Ollie Rattue
  * @license   http://www.opensource.org/licenses/mit-license.php
- * @link      https://github.com/ollierattue/codeigniter-sagepay-form
  */
 
 class Sagepay_form_example extends CI_Controller
